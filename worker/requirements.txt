@@ -1,0 +1,12 @@
+celery
+redis
+pillow
+python-dotenv
+cloudinary
+requests
+PyMuPDF
+pikepdf
+zopfli
+ocrmypdf
+pillow-heif>=0.13.0
+pillow-avif-plugin>=1.4.0

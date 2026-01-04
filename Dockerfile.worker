@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y \
     ocrmypdf \
     qpdf \
     zlib1g-dev \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
-
 
 # Copy worker requirements and install Python dependencies
 COPY worker/requirements.txt /app/requirements.txt
@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy worker code
 COPY worker/ /app/worker/
 
-# Set PYTHONPATH 
+# Set PYTHONPATH
 ENV PYTHONPATH=/app
 
 # Create temp dir for processing
@@ -43,5 +43,8 @@ RUN useradd --create-home --shell /bin/bash worker_user && \
 
 USER worker_user
 
-# Run Celery worker
-CMD ["celery", "-A", "worker.worker", "worker", "--loglevel=info", "--concurrency=4"]
+# Expose dummy port (required by Render Web Service)
+EXPOSE 8000
+
+# Run dummy HTTP server + Celery worker
+CMD ["sh", "-c", "python -m http.server 8000 & celery -A worker.worker worker --loglevel=info --concurrency=4"]

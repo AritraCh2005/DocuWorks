@@ -1,15 +1,16 @@
-# Use Python 3.11 slim image
+# Use Python slim image
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (IMPORTANT)
 RUN apt-get update && apt-get install -y \
     gcc \
+    ghostscript \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy server requirements and install Python dependencies
+# Copy requirements and install Python deps
 COPY server/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -19,13 +20,13 @@ COPY server/ /app/server/
 # Set PYTHONPATH
 ENV PYTHONPATH=/app
 
-# Create a non-root user for security
+# Create non-root user
 RUN useradd --create-home --shell /bin/bash server_user
 RUN chown -R server_user:server_user /app
 USER server_user
 
-# Expose port
+# Expose port (informational)
 EXPOSE 8000
 
-# Default command to run FastAPI server
-CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# IMPORTANT: Bind to Render's PORT and NO reload
+CMD ["sh", "-c", "uvicorn server.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
